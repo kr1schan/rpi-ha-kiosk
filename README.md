@@ -218,7 +218,77 @@ and renders the page correctly.
 
 ---
 
-### Step 7: Rotate Display and Touch Input (optional)
+### Step 7: Display Control via MQTT and Home Assistant
+
+The display can be turned on/off by Home Assistant based on presence detection.
+When a presence sensor detects someone, HA publishes an MQTT message to the Pi,
+which immediately turns the display on or off.
+
+#### 7a: Create MQTT user in HA
+
+In HA → **Settings → Apps → Mosquitto broker → Configuration → Logins → Add**:
+- Username: `mqtt-kiosk` (or any name)
+- Password: choose a strong password
+
+Store the password in `group_vars/secrets.yml` (gitignored):
+```yaml
+mqtt_password: YOUR_PASSWORD
+```
+
+#### 7b: Configure MQTT variables
+
+In `group_vars/all.yml`:
+```yaml
+mqtt_host: homeassistant.local
+mqtt_port: 1883
+mqtt_user: mqtt-kiosk
+mqtt_topic: kiosk/display
+```
+
+The Ansible playbook deploys `/usr/local/bin/kiosk-display.sh` which subscribes
+to `kiosk/display` and calls `wlopm --on/--off` accordingly. It is started
+automatically via the labwc autostart.
+
+#### 7c: Create HA automations
+
+In HA → **Settings → Automations → Create automation → three dots → Edit as YAML**:
+
+**Display on when presence detected:**
+```yaml
+alias: Kiosk Display - Presence detected
+trigger:
+  - platform: state
+    entity_id: binary_sensor.YOUR_PRESENCE_SENSOR
+    to: "on"
+action:
+  - service: mqtt.publish
+    data:
+      topic: kiosk/display
+      payload: "on"
+mode: single
+```
+
+**Display off when no presence:**
+```yaml
+alias: Kiosk Display - No presence
+trigger:
+  - platform: state
+    entity_id: binary_sensor.YOUR_PRESENCE_SENSOR
+    to: "off"
+action:
+  - service: mqtt.publish
+    data:
+      topic: kiosk/display
+      payload: "off"
+mode: single
+```
+
+> The Pi's `kiosk-display.sh` script subscribes to the MQTT topic and reacts
+> instantly — no polling, no delay.
+
+---
+
+### Step 8: Rotate Display and Touch Input (optional)
 
 If the display is mounted in landscape orientation but the panel is physically
 vertical (portrait), both the display output and the touch coordinates need to
@@ -291,7 +361,7 @@ sudo reboot
 
 ---
 
-### Step 8: Enable Dark Mode
+### Step 9: Enable Dark Mode
 
 The cleanest approach is to configure Firefox to report `prefers-color-scheme: dark`
 to all web content. Home Assistant (and any other website) will automatically
@@ -331,6 +401,7 @@ The value `0` = dark, `1` = light, `2` = follow system default.
 | User autostart overrides system autostart | It does not — both `/etc/xdg/labwc/autostart` and `~/.config/labwc/autostart` are executed |
 | Display rotated but touches are wrong | Kanshi/wlr output rotation does not automatically rotate touch coordinates — add a udev `LIBINPUT_CALIBRATION_MATRIX` rule and reboot |
 | Touch calibration seems doubled | Do not combine a udev calibration matrix with a compositor touch transform — use one or the other |
+| MQTT "not authorised" error | User added in HA People but not in Mosquitto config — add user explicitly in Settings → Apps → Mosquitto broker → Configuration → Logins |
 | Dark mode pref not applied | Quotes were stripped when using `echo` to write prefs.js — always use Python to write Firefox preferences |
 
 ---

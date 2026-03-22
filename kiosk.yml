@@ -2,6 +2,8 @@
 - name: Raspberry Pi Home Assistant Kiosk Setup
   hosts: kiosk
   become: false
+  vars_files:
+    - group_vars/secrets.yml
 
   tasks:
 
@@ -14,6 +16,7 @@
         name:
           - firefox
           - unclutter
+          - mosquitto-clients
         state: present
         update_cache: true
       become: true
@@ -139,6 +142,21 @@
         regexp: 'toolkit\.legacyUserProfileCustomizations\.stylesheets'
         line: 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
       when: firefox_profile.files | length > 0
+
+    # -------------------------------------------------------------------------
+    # Firefox: dark mode
+    # -------------------------------------------------------------------------
+
+    # -------------------------------------------------------------------------
+    # MQTT display control script
+    # -------------------------------------------------------------------------
+
+    - name: Deploy kiosk display control script
+      ansible.builtin.template:
+        src: files/kiosk-display.sh
+        dest: /usr/local/bin/kiosk-display.sh
+        mode: '0700'
+      become: true
 
     # -------------------------------------------------------------------------
     # Firefox: dark mode

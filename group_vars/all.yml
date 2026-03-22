@@ -20,3 +20,10 @@ xkb_model: pc105
 
 # Screen timeout in seconds (600 = 10 minutes, 0 to disable)
 screen_timeout: 600
+
+# MQTT display control
+mqtt_host: homeassistant.local
+mqtt_port: 1883
+mqtt_user: mqtt-kiosk
+mqtt_topic: kiosk/display
+# mqtt_password is defined in group_vars/secrets.yml (gitignored)
