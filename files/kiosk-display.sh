@@ -12,6 +12,7 @@ FADE_DELAY=0.04  # seconds per step → ~0.8s total fade
 
 fade_in() {
     wlopm --on {{ display_output }}
+    echo 0 > "$BACKLIGHT"  # prevent flash at full brightness on wakeup
     for i in $(seq 1 $FADE_STEPS); do
         echo $((MAX_BRIGHTNESS * i / FADE_STEPS)) > "$BACKLIGHT"
         sleep $FADE_DELAY
