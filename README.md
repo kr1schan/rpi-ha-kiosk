@@ -435,10 +435,27 @@ The value `0` = dark, `1` = light, `2` = follow system default.
 
 After a clean reboot the following should be true:
 
-1. Pi boots directly to Firefox (no login screen, no desktop icons)
-2. Firefox shows `http://homeassistant.local:8123` in fullscreen after ~5 seconds
-3. No address bar, no tab bar, no title bar, no top panel
-4. Tapping any input field opens squeekboard at the bottom of the screen
-5. The screen turns off after 10 minutes of inactivity and turns back on when touched
-6. Touch coordinates match the rotated display orientation (if rotation was applied)
-7. Home Assistant is displayed in dark mode
+**Boot & display:**
+1. Pi boots directly to Firefox — no login screen, no desktop, no panel
+2. Firefox shows the HA dashboard in fullscreen after ~5 seconds
+3. No address bar, no tab bar, no title bar visible
+4. Home Assistant is displayed in dark mode
+
+**Touch & keyboard:**
+5. Tapping anywhere on the screen works correctly (coordinates match orientation)
+6. Tapping an input field (e.g. HA login) opens squeekboard at the bottom of the screen
+
+**MQTT display control:**
+7. Test manually from the Pi or any machine with `mosquitto_pub`:
+```bash
+mosquitto_pub -h homeassistant.local -p 1883 -u mqtt-kiosk -P YOUR_PASSWORD -t kiosk/display -m off
+mosquitto_pub -h homeassistant.local -p 1883 -u mqtt-kiosk -P YOUR_PASSWORD -t kiosk/display -m on
+```
+8. When the HA presence sensor changes to `off`, the display turns off
+9. When the HA presence sensor changes to `on`, the display turns on
+
+**MQTT subscriber check:**
+```bash
+ssh USER@PI_IP 'ps aux | grep kiosk-display | grep -v grep'
+```
+Should show the `kiosk-display.sh` process running.
