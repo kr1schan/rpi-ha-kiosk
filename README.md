@@ -1,5 +1,30 @@
 # Raspberry Pi Home Assistant Kiosk
 
+Turn a Raspberry Pi with a touchscreen into a dedicated fullscreen Home Assistant
+display. The Pi boots directly into the HA dashboard — no desktop, no browser UI,
+just Home Assistant. Controlled entirely by touch, with an on-screen keyboard for
+text input.
+
+## Features
+
+- **Fullscreen kiosk** — Firefox opens automatically on boot, no address bar, no tab bar, no title bar
+- **On-screen keyboard** — squeekboard appears automatically when tapping input fields
+- **Display rotation** — configurable for portrait or landscape mounting
+- **Touch calibration** — touch coordinates match the display orientation
+- **Dark mode** — Home Assistant and all web content rendered in dark mode
+- **Display power control** — display turns on/off based on presence detection via Home Assistant automations and MQTT
+- **Fully automated setup** — single Ansible playbook configures everything from scratch
+
+## Requirements
+
+- Raspberry Pi running **Raspberry Pi OS Bookworm** (64-bit)
+- Touchscreen (tested with Raspberry Pi Touch Display 2)
+- Home Assistant running on the local network
+- Home Assistant Mosquitto MQTT broker add-on (for display power control)
+- Ansible on your local machine
+
+---
+
 ## Quick Start
 
 ```bash
