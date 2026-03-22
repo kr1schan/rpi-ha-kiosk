@@ -185,6 +185,13 @@
         line: 'user_pref("layout.css.prefers-color-scheme.content-override", 0);'
       when: firefox_profile.files | length > 0
 
+    - name: Set Firefox zoom level
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'layout\.css\.devPixelsPerPx'
+        line: 'user_pref("layout.css.devPixelsPerPx", "{{ firefox_zoom }}");'
+      when: firefox_profile.files | length > 0
+
   # ---------------------------------------------------------------------------
   # Handlers
   # ---------------------------------------------------------------------------
