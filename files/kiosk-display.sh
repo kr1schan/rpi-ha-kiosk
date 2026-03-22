@@ -15,7 +15,12 @@ mosquitto_sub \
   --will-payload offline \
   -R | while read -r msg; do
     case "$msg" in
-      on)  wlopm --on {{ display_output }} ;;
+      on)
+        wlopm --on {{ display_output }}
+        sleep 0.5
+        ydotool mousemove 360 640
+        ydotool click 1
+        ;;
       off) wlopm --off {{ display_output }} ;;
     esac
 done

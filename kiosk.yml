@@ -17,6 +17,7 @@
           - firefox
           - unclutter
           - mosquitto-clients
+          - ydotool
         state: present
         update_cache: true
       become: true
@@ -110,6 +111,21 @@
         mode: '0644'
       become: true
       notify: Reload udev rules
+
+    - name: Deploy uinput permissions udev rule
+      ansible.builtin.copy:
+        content: 'KERNEL=="uinput", GROUP="input", MODE="0660"'
+        dest: /etc/udev/rules.d/99-uinput.rules
+        mode: '0644'
+      become: true
+      notify: Reload udev rules
+
+    - name: Load uinput kernel module at boot
+      ansible.builtin.lineinfile:
+        path: /etc/modules
+        line: uinput
+        state: present
+      become: true
 
     # -------------------------------------------------------------------------
     # Firefox: hide address bar and tab bar
