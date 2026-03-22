@@ -1,0 +1,2 @@
+[kiosk]
+YOUR_PI_HOSTNAME ansible_host=YOUR_PI_IP ansible_user=YOUR_USERNAME

@@ -1,0 +1,22 @@
+kiosk_user: pi                              # username on the Pi
+kiosk_url: http://homeassistant.local:8123  # Home Assistant URL
+
+# Display settings
+display_output: DSI-1
+display_mode: "720x1280@60.038"
+display_transform: "90"   # 90=CW, 270=CCW, 180=flipped, normal=no rotation
+
+# Touch calibration matrix matching display_transform
+# 90 CW:  "0 -1 1 1 0 0"
+# 270 CCW: "0 1 0 -1 0 1"
+# 180:    "-1 0 1 0 -1 1"
+# normal: "1 0 0 0 1 0"
+touch_calibration_matrix: "0 -1 1 1 0 0"
+touch_device_name: "Goodix Capacitive TouchScreen"
+
+# Keyboard layout
+xkb_layout: de
+xkb_model: pc105
+
+# Screen timeout in seconds (600 = 10 minutes, 0 to disable)
+screen_timeout: 600

@@ -1,0 +1,171 @@
+---
+- name: Raspberry Pi Home Assistant Kiosk Setup
+  hosts: kiosk
+  become: false
+
+  tasks:
+
+    # -------------------------------------------------------------------------
+    # Packages
+    # -------------------------------------------------------------------------
+
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - firefox
+          - unclutter
+        state: present
+        update_cache: true
+      become: true
+
+    # -------------------------------------------------------------------------
+    # Auto-login via LightDM
+    # -------------------------------------------------------------------------
+
+    - name: Enable auto-login in LightDM
+      ansible.builtin.lineinfile:
+        path: /etc/lightdm/lightdm.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        insertafter: "\\[Seat:\\*\\]"
+      become: true
+      loop:
+        - { regexp: '^#?autologin-user=', line: "autologin-user={{ kiosk_user }}" }
+        - { regexp: '^#?autologin-session=', line: 'autologin-session=LXDE-pi-labwc' }
+
+    # -------------------------------------------------------------------------
+    # labwc configuration
+    # -------------------------------------------------------------------------
+
+    - name: Ensure labwc config directory exists
+      ansible.builtin.file:
+        path: "~/.config/labwc"
+        state: directory
+        mode: '0755'
+
+    - name: Deploy labwc autostart
+      ansible.builtin.template:
+        src: files/labwc-autostart
+        dest: ~/.config/labwc/autostart
+        mode: '0644'
+
+    - name: Deploy labwc environment
+      ansible.builtin.template:
+        src: files/labwc-environment
+        dest: ~/.config/labwc/environment
+        mode: '0644'
+
+    - name: Add Firefox window rule to labwc rc.xml
+      ansible.builtin.blockinfile:
+        path: ~/.config/labwc/rc.xml
+        marker: "  <!-- {mark} ANSIBLE MANAGED: firefox window rule -->"
+        insertbefore: "</openbox_config>"
+        block: |
+          <windowRules>
+            <windowRule identifier="firefox*" serverDecoration="no">
+              <action name="Maximize"/>
+            </windowRule>
+          </windowRules>
+      notify: Reload labwc
+
+    # -------------------------------------------------------------------------
+    # Remove top panel
+    # -------------------------------------------------------------------------
+
+    - name: Remove wf-panel-pi from system autostart
+      ansible.builtin.lineinfile:
+        path: /etc/xdg/labwc/autostart
+        regexp: '.*wf-panel-pi.*'
+        state: absent
+      become: true
+
+    # -------------------------------------------------------------------------
+    # Display rotation (kanshi)
+    # -------------------------------------------------------------------------
+
+    - name: Ensure kanshi config directory exists
+      ansible.builtin.file:
+        path: ~/.config/kanshi
+        state: directory
+        mode: '0755'
+
+    - name: Deploy kanshi display rotation config
+      ansible.builtin.template:
+        src: files/kanshi.conf
+        dest: ~/.config/kanshi/config
+        mode: '0644'
+      notify: Reload kanshi
+
+    # -------------------------------------------------------------------------
+    # Touch input rotation (udev)
+    # -------------------------------------------------------------------------
+
+    - name: Deploy touchscreen udev rule
+      ansible.builtin.template:
+        src: files/99-touchscreen-rotate.rules
+        dest: /etc/udev/rules.d/99-touchscreen-rotate.rules
+        mode: '0644'
+      become: true
+      notify: Reload udev rules
+
+    # -------------------------------------------------------------------------
+    # Firefox: hide address bar and tab bar
+    # -------------------------------------------------------------------------
+
+    - name: Find Firefox profile directory
+      ansible.builtin.find:
+        paths: ~/.mozilla/firefox
+        patterns: "*.default-release"
+        file_type: directory
+      register: firefox_profile
+
+    - name: Ensure Firefox chrome directory exists
+      ansible.builtin.file:
+        path: "{{ firefox_profile.files[0].path }}/chrome"
+        state: directory
+        mode: '0755'
+      when: firefox_profile.files | length > 0
+
+    - name: Deploy userChrome.css
+      ansible.builtin.copy:
+        src: files/userChrome.css
+        dest: "{{ firefox_profile.files[0].path }}/chrome/userChrome.css"
+        mode: '0644'
+      when: firefox_profile.files | length > 0
+
+    - name: Enable userChrome.css in Firefox prefs
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'toolkit\.legacyUserProfileCustomizations\.stylesheets'
+        line: 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
+      when: firefox_profile.files | length > 0
+
+    # -------------------------------------------------------------------------
+    # Firefox: dark mode
+    # -------------------------------------------------------------------------
+
+    - name: Set Firefox dark mode preference
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'layout\.css\.prefers-color-scheme\.content-override'
+        line: 'user_pref("layout.css.prefers-color-scheme.content-override", 0);'
+      when: firefox_profile.files | length > 0
+
+  # ---------------------------------------------------------------------------
+  # Handlers
+  # ---------------------------------------------------------------------------
+
+  handlers:
+
+    - name: Reload labwc
+      ansible.builtin.shell: |
+        kill -HUP $(pidof labwc) 2>/dev/null || true
+
+    - name: Reload kanshi
+      ansible.builtin.shell: |
+        killall -HUP kanshi 2>/dev/null || true
+
+    - name: Reload udev rules
+      ansible.builtin.shell: |
+        udevadm control --reload-rules && udevadm trigger
+      become: true

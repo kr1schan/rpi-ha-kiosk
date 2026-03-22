@@ -1,0 +1,3 @@
+swayidle -w timeout {{ screen_timeout }} "wlopm --off \*" resume "wlopm --on \*" &
+unclutter --timeout 1 &
+sleep 5 && firefox {{ kiosk_url }} &

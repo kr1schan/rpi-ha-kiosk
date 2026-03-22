@@ -1,0 +1,1 @@
+ACTION=="add|change", ATTRS{name}=="{{ touch_device_name }}", ENV{LIBINPUT_CALIBRATION_MATRIX}="{{ touch_calibration_matrix }}"
