@@ -17,7 +17,7 @@ mosquitto_sub \
     case "$msg" in
       on)
         wlopm --on {{ display_output }}
-        sleep 0.5
+        sleep 1
         ydotool mousemove 360 640
         ydotool click 1
         ;;
