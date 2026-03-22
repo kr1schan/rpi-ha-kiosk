@@ -428,6 +428,7 @@ The value `0` = dark, `1` = light, `2` = follow system default.
 | Touch calibration seems doubled | Do not combine a udev calibration matrix with a compositor touch transform — use one or the other |
 | MQTT "not authorised" error | User added in HA People but not in Mosquitto config — add user explicitly in Settings → Apps → Mosquitto broker → Configuration → Logins |
 | Dark mode pref not applied | Quotes were stripped when using `echo` to write prefs.js — always use Python to write Firefox preferences |
+| Firefox window small after labwc reconfigure | labwc window rules may not re-apply to already-open windows — start Firefox with `--maximized` flag to ensure it always opens maximized |
 
 ---
 
