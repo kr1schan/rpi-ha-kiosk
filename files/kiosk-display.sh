@@ -7,19 +7,15 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 
 BACKLIGHT=/sys/class/backlight/10-0045/brightness
 MAX_BRIGHTNESS=31
-FADE_STEPS=20
-FADE_DELAY=0.04  # seconds per step → ~0.8s total fade
+FADE_STEPS=30
+FADE_DELAY=0.06  # seconds per step → ~1.8s total fade
 
 fade_in() {
     wlopm --on {{ display_output }}
     echo 0 > "$BACKLIGHT"  # prevent flash at full brightness on wakeup
-    # Reload Firefox while screen is still dark to refresh clock etc.
-    ydotool key 63:1 63:0  # F5
+    # Reload Firefox while screen is still dark, wait for page to load
+    firefox {{ kiosk_url }} &
     sleep 1.5
-    # Restore focus
-    ydotool mousemove 360 640
-    ydotool click 1
-    sleep 0.2
     for i in $(seq 1 $FADE_STEPS); do
         echo $((MAX_BRIGHTNESS * i / FADE_STEPS)) > "$BACKLIGHT"
         sleep $FADE_DELAY
