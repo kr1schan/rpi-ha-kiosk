@@ -9,6 +9,14 @@ BACKLIGHT=/sys/class/backlight/10-0045/brightness
 MAX_BRIGHTNESS=31
 FADE_STEPS=30
 FADE_DELAY=0.06  # seconds per step → ~1.8s total fade
+FADE_PID=""
+
+kill_fade() {
+    if [ -n "$FADE_PID" ] && kill -0 "$FADE_PID" 2>/dev/null; then
+        kill "$FADE_PID" 2>/dev/null
+        wait "$FADE_PID" 2>/dev/null
+    fi
+}
 
 fade_in() {
     wlopm --on {{ display_output }}
@@ -39,8 +47,9 @@ mosquitto_sub \
   --will-topic {{ mqtt_topic }}/status \
   --will-payload offline \
   -R | while read -r msg; do
+    kill_fade
     case "$msg" in
-      on)  fade_in ;;
-      off) fade_out ;;
+      on)  fade_in & FADE_PID=$! ;;
+      off) fade_out & FADE_PID=$! ;;
     esac
 done
