@@ -171,7 +171,7 @@
       ansible.builtin.template:
         src: files/kiosk-display.sh
         dest: /usr/local/bin/kiosk-display.sh
-        mode: '0700'
+        mode: '0755'
       become: true
 
     # -------------------------------------------------------------------------
