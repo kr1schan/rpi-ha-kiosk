@@ -128,6 +128,17 @@
       become: true
 
     # -------------------------------------------------------------------------
+    # Fan control
+    # -------------------------------------------------------------------------
+
+    - name: Configure GPIO fan control
+      ansible.builtin.lineinfile:
+        path: /boot/firmware/config.txt
+        regexp: '^dtoverlay=gpio-fan'
+        line: "dtoverlay=gpio-fan,gpiopin={{ fan_gpio }},temp={{ fan_temp }}"
+      become: true
+
+    # -------------------------------------------------------------------------
     # Firefox: hide address bar and tab bar
     # -------------------------------------------------------------------------
 

@@ -17,6 +17,10 @@ touch_device_name: "Goodix Capacitive TouchScreen"
 # Firefox zoom (1.0 = 100%, 1.25 = 125%)
 firefox_zoom: "1.25"
 
+# Fan control (gpio-fan dtoverlay)
+fan_gpio: 14
+fan_temp: 60000  # millidegrees, 60000 = 60°C
+
 # Keyboard layout
 xkb_layout: de
 xkb_model: pc105

@@ -13,6 +13,7 @@ text input.
 - **Touch calibration** — touch coordinates match the display orientation
 - **Dark mode** — Home Assistant and all web content rendered in dark mode
 - **Display power control** — display turns on/off based on presence detection via Home Assistant automations and MQTT
+- **Fan control** — GPIO-connected fan activates automatically above a configurable temperature threshold
 - **Fully automated setup** — single Ansible playbook configures everything from scratch
 
 ## Requirements
@@ -21,6 +22,7 @@ text input.
 - Touchscreen (tested with Raspberry Pi Touch Display 2)
 - Home Assistant running on the local network
 - Home Assistant Mosquitto MQTT broker add-on (for display power control)
+- GPIO fan with heatsink (optional, recommended for enclosed cases)
 - Ansible on your local machine
 
 ---
