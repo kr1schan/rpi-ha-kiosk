@@ -13,6 +13,9 @@ text input.
 - **Touch calibration** — touch coordinates match the display orientation
 - **Dark mode** — Home Assistant and all web content rendered in dark mode
 - **Display power control** — display turns on/off based on presence detection via Home Assistant automations and MQTT
+- **Display fade in/out** — smooth brightness transitions instead of abrupt on/off
+- **Touch wake** — touch the screen to wake the display when it's off
+- **Duplicate message suppression** — ignores repeated on/off MQTT messages when display is already in that state
 - **Fan control** — GPIO-connected fan activates automatically above a configurable temperature threshold
 - **Fully automated setup** — single Ansible playbook configures everything from scratch
 
@@ -454,8 +457,11 @@ After a clean reboot the following should be true:
 mosquitto_pub -h homeassistant.local -p 1883 -u mqtt-kiosk -P YOUR_PASSWORD -t kiosk/display -m off
 mosquitto_pub -h homeassistant.local -p 1883 -u mqtt-kiosk -P YOUR_PASSWORD -t kiosk/display -m on
 ```
-8. When the HA presence sensor changes to `off`, the display turns off
-9. When the HA presence sensor changes to `on`, the display turns on
+8. Display fades out smoothly when presence sensor goes `off`
+9. Display fades in smoothly when presence sensor goes `on`
+10. Sending `on` while already on does not reload the page
+11. Touching the screen while display is off wakes it up with fade-in
+12. Rapid off→on transitions cancel the fade-out and start fade-in immediately
 
 **MQTT subscriber check:**
 ```bash

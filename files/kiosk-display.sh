@@ -25,8 +25,6 @@ kill_fade() {
 fade_in() {
     wlopm --on {{ display_output }}
     echo 0 > "$BACKLIGHT"
-    firefox {{ kiosk_url }} &
-    sleep 1.5
     for i in $(seq 1 $FADE_STEPS); do
         echo $((MAX_BRIGHTNESS * i / FADE_STEPS)) > "$BACKLIGHT"
         sleep $FADE_DELAY
