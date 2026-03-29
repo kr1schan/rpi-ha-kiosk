@@ -15,6 +15,12 @@ TOUCH_DEV=/dev/input/event4
 
 echo "on" > "$STATE_FILE"
 
+# Reset swayidle timer and restore Firefox focus
+poke_idle() {
+    ydotool mousemove --absolute -x 360 -y 640 2>/dev/null
+    ydotool click 1 2>/dev/null
+}
+
 kill_fade() {
     if [ -n "$FADE_PID" ] && kill -0 "$FADE_PID" 2>/dev/null; then
         kill "$FADE_PID" 2>/dev/null
@@ -30,6 +36,7 @@ fade_in() {
         sleep $FADE_DELAY
     done
     echo "on" > "$STATE_FILE"
+    poke_idle
 }
 
 fade_out() {
