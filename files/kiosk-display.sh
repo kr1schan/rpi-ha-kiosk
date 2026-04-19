@@ -12,7 +12,6 @@ FADE_DELAY=0.06  # seconds per step, ~1.8s total fade
 FADE_PID=""
 STATE_FILE=/tmp/kiosk-display-state
 TOUCH_DEV=/dev/input/event4
-KIOSK_URL="{{ kiosk_url }}"
 
 echo "on" > "$STATE_FILE"
 
@@ -61,43 +60,6 @@ fade_out() {
         if [ "$(cat $STATE_FILE)" = "off" ]; then
             echo "on" > "$STATE_FILE"
             fade_in
-        fi
-    done
-) &
-
-# Watchdog: restart Firefox if it crashes or loses its network process
-(
-    sleep 30  # Wait for Firefox to fully start up
-    SOCKET_MISSING_SINCE=0
-    while true; do
-        sleep 30
-
-        # If Firefox main process is gone: restart it
-        if ! pgrep -x firefox > /dev/null 2>&1; then
-            MOZ_ENABLE_WAYLAND=1 firefox --maximized "$KIOSK_URL" &>/dev/null &
-            SOCKET_MISSING_SINCE=0
-            sleep 15
-            continue
-        fi
-
-        # If display is on and socket process is missing: Firefox network is broken
-        if [ "$(cat $STATE_FILE 2>/dev/null)" = "on" ]; then
-            if ! pgrep -fa firefox | grep -q " socket$"; then
-                NOW=$(date +%s)
-                [ "$SOCKET_MISSING_SINCE" -eq 0 ] && SOCKET_MISSING_SINCE=$NOW
-                ELAPSED=$(( NOW - SOCKET_MISSING_SINCE ))
-                if [ "$ELAPSED" -ge 120 ]; then
-                    pkill -x firefox 2>/dev/null
-                    sleep 3
-                    MOZ_ENABLE_WAYLAND=1 firefox --maximized "$KIOSK_URL" &>/dev/null &
-                    SOCKET_MISSING_SINCE=0
-                    sleep 15
-                fi
-            else
-                SOCKET_MISSING_SINCE=0
-            fi
-        else
-            SOCKET_MISSING_SINCE=0
         fi
     done
 ) &
