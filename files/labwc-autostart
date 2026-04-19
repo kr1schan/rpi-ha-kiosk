@@ -1,4 +1,4 @@
-swayidle -w timeout {{ screen_timeout }} "wlopm --off \*" resume "wlopm --on \*" &
+swayidle -w timeout {{ screen_timeout }} "wlopm --off \*; echo off > /tmp/kiosk-display-state" resume "wlopm --on \*; echo on > /tmp/kiosk-display-state; sleep 2; ydotool mousemove 360 640; sleep 0.3; ydotool click 1" &
 unclutter --timeout 1 &
 sleep 5 && firefox --maximized {{ kiosk_url }} &
 /usr/local/bin/kiosk-display.sh &
