@@ -203,6 +203,35 @@
         line: 'user_pref("layout.css.devPixelsPerPx", "{{ firefox_zoom }}");'
       when: firefox_profile.files | length > 0
 
+    # -------------------------------------------------------------------------
+    # Firefox: prevent Page Visibility freeze when compositor disables output
+    # -------------------------------------------------------------------------
+
+    - name: Disable Firefox Page Visibility API
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'dom\.visibilityAPI\.enabled'
+        line: 'user_pref("dom.visibilityAPI.enabled", false);'
+      when: firefox_profile.files | length > 0
+
+    # -------------------------------------------------------------------------
+    # Firefox: suppress crash recovery / session restore prompts
+    # -------------------------------------------------------------------------
+
+    - name: Disable Firefox crash recovery prompt
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'browser\.sessionstore\.resume_from_crash'
+        line: 'user_pref("browser.sessionstore.resume_from_crash", false);'
+      when: firefox_profile.files | length > 0
+
+    - name: Disable Firefox session restore counter
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'browser\.sessionstore\.max_resumed_crashes'
+        line: 'user_pref("browser.sessionstore.max_resumed_crashes", 0);'
+      when: firefox_profile.files | length > 0
+
   # ---------------------------------------------------------------------------
   # Handlers
   # ---------------------------------------------------------------------------
