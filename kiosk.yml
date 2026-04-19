@@ -232,6 +232,24 @@
         line: 'user_pref("browser.sessionstore.max_resumed_crashes", 0);'
       when: firefox_profile.files | length > 0
 
+    # -------------------------------------------------------------------------
+    # Firefox: always open HA dashboard on startup
+    # -------------------------------------------------------------------------
+
+    - name: Set Firefox startup page mode to homepage
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'browser\.startup\.page'
+        line: 'user_pref("browser.startup.page", 1);'
+      when: firefox_profile.files | length > 0
+
+    - name: Set Firefox homepage to HA dashboard
+      ansible.builtin.lineinfile:
+        path: "{{ firefox_profile.files[0].path }}/prefs.js"
+        regexp: 'browser\.startup\.homepage"'
+        line: 'user_pref("browser.startup.homepage", "{{ kiosk_url }}");'
+      when: firefox_profile.files | length > 0
+
   # ---------------------------------------------------------------------------
   # Handlers
   # ---------------------------------------------------------------------------
