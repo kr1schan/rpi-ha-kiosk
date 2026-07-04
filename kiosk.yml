@@ -186,6 +186,26 @@
       become: true
 
     # -------------------------------------------------------------------------
+    # Nightly Firefox restart (avoid long-running freeze risk)
+    # -------------------------------------------------------------------------
+
+    - name: Deploy nightly Firefox restart script
+      ansible.builtin.template:
+        src: files/kiosk-restart-firefox.sh
+        dest: /usr/local/bin/kiosk-restart-firefox.sh
+        mode: '0755'
+      become: true
+
+    - name: Schedule nightly Firefox restart at 03:00
+      ansible.builtin.cron:
+        name: "Restart kiosk Firefox nightly"
+        user: "{{ kiosk_user }}"
+        minute: "0"
+        hour: "3"
+        job: "/usr/local/bin/kiosk-restart-firefox.sh"
+      become: true
+
+    # -------------------------------------------------------------------------
     # Firefox: dark mode
     # -------------------------------------------------------------------------
 
